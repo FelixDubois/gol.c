@@ -2,4 +2,4 @@
 
 set -xe
 
-cc -Wall -Wextra main.c -o gol
+cc -Wall -Wextra gol.c -o gol
