@@ -9,7 +9,7 @@
 #define MAP_HEIGHT 40
 
 typedef struct {
-  bool map[MAP_WIDTH * MAP_HEIGHT];
+  bool map[MAP_HEIGHT][MAP_WIDTH];
   int step;
 } life;
 
@@ -18,35 +18,34 @@ life gol;
 int count_neighbors(int x, int y) {
   int count = 0;
 
-  count += gol.map[y * MAP_WIDTH + (x - 1 + MAP_WIDTH) % MAP_WIDTH];
-  count += gol.map[y * MAP_WIDTH + (x + 1) % MAP_WIDTH];
-  count += gol.map[(y + 1) % MAP_HEIGHT * MAP_WIDTH + x];
-  count += gol.map[(y - 1 + MAP_HEIGHT) % MAP_HEIGHT * MAP_WIDTH + x];
+  count += gol.map[y][(x - 1 + MAP_WIDTH) % MAP_WIDTH];
+  count += gol.map[y][(x + 1) % MAP_WIDTH];
+  count += gol.map[(y + 1) % MAP_HEIGHT][x];
+  count += gol.map[(y - 1 + MAP_HEIGHT) % MAP_HEIGHT][x];
 
-  count += gol.map[(y - 1 + MAP_HEIGHT) % MAP_HEIGHT * MAP_WIDTH +
-                   (x - 1 + MAP_WIDTH) % MAP_WIDTH];
-  count += gol.map[(y + 1) % MAP_HEIGHT * MAP_WIDTH + (x + 1) % MAP_WIDTH];
-  count += gol.map[(y + 1) % MAP_HEIGHT * MAP_WIDTH +
-                   (x - 1 + MAP_WIDTH) % MAP_WIDTH];
-  count += gol.map[(y - 1 + MAP_HEIGHT) % MAP_HEIGHT * MAP_WIDTH +
-                   (x + 1) % MAP_WIDTH];
+  count += gol.map[(y - 1 + MAP_HEIGHT) % MAP_HEIGHT]
+                  [(x - 1 + MAP_WIDTH) % MAP_WIDTH];
+  count += gol.map[(y + 1) % MAP_HEIGHT][(x + 1) % MAP_WIDTH];
+  count += gol.map[(y + 1) % MAP_HEIGHT][(x - 1 + MAP_WIDTH) % MAP_WIDTH];
+  count += gol.map[(y - 1 + MAP_HEIGHT) % MAP_HEIGHT][(x + 1) % MAP_WIDTH];
 
   return count;
 }
 
 void step() {
-  life ngol;
+  life new_gol;
+
   for (size_t y = 0; y < MAP_HEIGHT; ++y) {
     for (size_t x = 0; x < MAP_WIDTH; ++x) {
       int c = count_neighbors(x, y);
 
-      int s = gol.map[y * MAP_WIDTH + x];
-      ngol.map[y * MAP_WIDTH + x] = (c == 3 || (s && c == 2));
+      int s = gol.map[y][x];
+      new_gol.map[y][x] = (c == 3 || (s && c == 2));
     }
   }
 
-  ngol.step = gol.step + 1;
-  gol = ngol;
+  new_gol.step = gol.step + 1;
+  gol = new_gol;
 }
 
 void print_map() {
@@ -62,7 +61,7 @@ void print_map() {
       if (x == 0)
         printf("┃");
 
-      if (gol.map[y * MAP_WIDTH + x])
+      if (gol.map[y][x])
         printf("█");
       else
         printf(" ");
@@ -85,7 +84,7 @@ void generate_random_map(float density) {
   for (size_t y = 0; y < MAP_HEIGHT; ++y) {
     for (size_t x = 0; x < MAP_WIDTH; ++x) {
       float p = (float)rand() / RAND_MAX;
-      gol.map[y * MAP_WIDTH + x] = p < density;
+      gol.map[y][x] = p < density;
     }
   }
 }
@@ -93,7 +92,7 @@ void generate_random_map(float density) {
 int main() {
   srand(time(0));
 
-  generate_random_map(0.1);
+  generate_random_map(0.2);
 
   while (1) {
     printf("Step : %i\n", gol.step);
